@@ -1,9 +1,8 @@
 #!/usr/bin/perl
 
-# $Id: calc.pl,v 1.2 1996/12/17 01:33:48 jake Exp $
+# $Id: calc.pl,v 1.2 1998/04/29 06:34:46 jake Exp $
 
-# Really trivial calculator. Reads one expression from STDIN and
-# evaluates it. Don't forget to hit ^D.
+# Really trivial calculator.
 
 use CalcParser;
 use Fstream;
@@ -11,4 +10,4 @@ use Fstream;
 $s = Fstream->new(\*STDIN, 'STDIN');
 $p = CalcParser->new(\&CalcParser::yylex, \&CalcParser::yyerror, 0);
 
-print $p->yyparse($s) . "\n";
+$p->yyparse($s);

@@ -1,4 +1,4 @@
-# $Id: Fstream.pm,v 1.2 1996/12/17 01:32:58 jake Exp $
+# $Id: Fstream.pm,v 1.2 1998/04/29 06:34:46 jake Exp $
 
 package Fstream;
 
@@ -34,13 +34,13 @@ and may be accessed with &name.
 
 sub new {
     my ($class, $fh, $name) = @_;
-    my $stream = {};
-    $stream->{'fh'} = $fh;
-    $stream->{'name'} = $name;
-    $stream->{'lineno'} = 1;
-    $stream->{'save'} = undef;
-    $stream->{'saved'} = 0;
-    bless $stream, $class;
+    my $stream = bless {}, $class;
+    $stream->{fh} = $fh;
+    $stream->{name} = $name;
+    $stream->{lineno} = 1;
+    $stream->{save} = undef;
+    $stream->{saved} = 0;
+    return $stream;
 }
 
 # ----------------------------------------------------------------------------
@@ -56,23 +56,23 @@ stream has been exhausted.
 
 sub getc {
     my ($stream) = @_;
-    my ($c);
+    my $c;
 
-    if ($stream->{'saved'}) {
-	$stream->{'saved'} = 0;
-	$c = $stream->{'save'};
+    if ($stream->{saved}) {
+	$stream->{saved} = 0;
+	$c = $stream->{save};
 	if ($c eq "\n") {
-	    $stream->{'lineno'}++;
+	    $stream->{lineno}++;
 	}
 	return $c;
     }
-    elsif (($c = getc($stream->{'fh'})) eq '') {
+    elsif (($c = getc($stream->{fh})) eq '') {
 	return '';
     }
     else {
-	$stream->{'save'} = $c;
+	$stream->{save} = $c;
 	if ($c eq "\n") {
-	    $stream->{'lineno'}++;
+	    $stream->{lineno}++;
 	}
 	return $c;
     }
@@ -88,9 +88,9 @@ back on the stream.
 sub ungetc {
     my ($stream) = @_;
 
-    $stream->{'saved'} = 1;
-    if ($stream->{'save'} eq "\n") {
-	$stream->{'lineno'}--;
+    $stream->{saved} = 1;
+    if ($stream->{save} eq "\n") {
+	$stream->{lineno}--;
     }
 }
 
@@ -102,7 +102,7 @@ seen).
 
 sub lineno {
     my ($stream) = @_;
-    return $stream->{'lineno'};
+    return $stream->{lineno};
 }
 
 =item name
@@ -113,7 +113,7 @@ Returns the name that was given in the constructor.
 
 sub name {
     my ($stream) = @_;
-    return $stream->{'name'};
+    return $stream->{name};
 }
 
 1;

@@ -1,7 +1,7 @@
-# $Id: README,v 1.3 1996/12/17 01:42:26 jake Exp $
+# $Id: README,v 1.2 1998/04/29 06:34:46 jake Exp $
 
 		       ------------------------
-		       Perl 5 Byacc Patches 0.5
+		       Perl 5 Byacc Patches 0.6
 		       ------------------------
 
 This is a set of patches to perl-byacc1.8.2 which cause it to generate
@@ -10,16 +10,17 @@ data and procedures). It's nice if you want to be squeaky clean, and
 very nice if you have a need for multiple parsers or multiple
 instances of a parser in one program.
 
-
 			  How to install it
 			  -----------------
 
 1. Get perl-byacc1.8.2 and unpack it. See
 
-     ftp://ftp.sterling.com/local/perl-byacc.tar.Z
+     http://www.perl.com/CPAN/src/misc/perl-byacc1.8.2.tar.gz
 
-2. Copy reader.c and skeleton.c from this directory to the
-   perl-byacc1.8.2 directory.
+2. Patch byacc with
+
+     cd perl-byacc1.8.2
+     patch < ../perl5-byacc-patches-0.6/patch
 
 3. Compile perl-byacc1.8.2 as usual.
 
@@ -27,34 +28,32 @@ instances of a parser in one program.
 			    How to use it
 			    -------------
 
+You invoke byacc a little differently:
+
+  1. -P now takes a package name argument, and the output file is
+     written as {package name}.pm.
+
+  2. You can pass a -5 argument to get a somewhat faster parser under
+     Perl 5.005 (using 'my Dog $spot' and 'use fields'). By the way,
+     parsers generated with these patches are thread-safe (all package
+     variables are static data), although of course you will break
+     that if you do something non-thread-safe in your lexer or
+     actions.
+
 You must write your parser a little differently:
 
-  1. Your .y file must begin with a package declaration (and any
-     imports you need):
-
-     %{
-     package Parser;
-     }
-
-  2. Your .y file must end with '1;' since the generated file is a
-     module.
-
-  3. Your &yylex and &yyerror procedures can (optionally) take an
+  1. Your &yylex and &yyerror procedures can (optionally) take an
      extra argument, which is passed from &yyparse (see below).
 
-  4. Your &yylex procedure no longer side-effects $yylval; instead,
+  2. Your &yylex procedure no longer side-effects $yylval; instead,
      it must return a list containing the token and the value.
 
-  5. Your top-level rule can assign a value to $$, and this value will
+  3. Your top-level rule can assign a value to $$, and this value will
      be returned as the value of &yyparse (see below).
-
-  6. The file that byacc writes is still called 'y.tab.pl', so you'll
-     probably need to add something to your Makefile to rename it (so
-     'use' works).
 
 And you must write the code that uses the parser differently too:
 
-  1. Use 'use Parser' (or whatever package you put in your .y file)
+  1. Use 'use Parser' (or whatever package you put in -P)
      instead of 'require "y.tab.pl"'.
 
   2. Create a new parser object with
@@ -65,9 +64,9 @@ And you must write the code that uses the parser differently too:
      &yyerror procedures, respectively. The third is true or false to
      enable or disable debugging output.
 
-     I can't really remember why I made the procedures parameters, but
-     it must have seemed like a good idea at the time. If you think of
-     a good use for it let me know.
+     Although you may wind up sticking your &yylex and &yyerror in the
+     parser package in most cases, this is more composable if you want
+     to do something weird.
 
   3. Start a parse by calling
 
@@ -92,8 +91,8 @@ And you must write the code that uses the parser differently too:
 			       Example
 			       -------
 
-I've included an ultra-simple calculator as an example. Type 'make' to
-build the parser.
+I've include two examples: an ultra-simple calculator and a random
+text generator. Type 'make' to build the parsers.
 
 
 			       Copying
@@ -108,5 +107,5 @@ distributed.
 			  Bugs and feedback
 			  -----------------
 
-Send them to Jake Donham (jaked@well.com). I'd love to hear from you
+Send them to Jake Donham (donham@linex.com). I'd love to hear from you
 if you find these patches useful.

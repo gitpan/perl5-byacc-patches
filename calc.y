@@ -1,12 +1,19 @@
 %{
-package CalcParser;
 %}
 
-%token NUMBER
+%token NUMBER EOL
 %left '+' '-'
 %left '*' '/'
 
 %%
+start:	|
+		start input
+	;
+
+input:		expr EOL	{ print $1 . "\n"; }
+	|	EOL
+	;
+
 expr:		NUMBER		{ $$ = $1; }
 	|	expr '+' expr	{ $$ = $1 + $3; }
 	|	expr '-' expr	{ $$ = $1 - $3; }
@@ -15,18 +22,22 @@ expr:		NUMBER		{ $$ = $1; }
 	|	'(' expr ')'	{ $$ = $2; }
 	;
 %%
-# $Id: calc.y,v 1.7 1996/12/17 01:29:51 jake Exp $
+# $Id: calc.y,v 1.2 1998/04/29 06:34:46 jake Exp $
 
 sub yylex
 {
     my ($s) = @_;
     my ($c, $val);
 
-    while (($c = $s->getc) eq ' ' || $c eq "\t" || $c eq "\n") {
+    while (($c = $s->getc) eq ' ' || $c eq "\t") {
     }
 
     if ($c eq '') {
 	return 0;
+    }
+
+    elsif ($c eq "\n") {
+	return $EOL;
     }
 
     elsif ($c =~ /[0-9]/) {
@@ -47,5 +58,3 @@ sub yyerror {
     my ($msg, $s) = @_;
     die "$msg at " . $s->name . " line " . $s->lineno . ".\n";
 }
-
-1;
